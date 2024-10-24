@@ -6,8 +6,37 @@ time_range = pd.date_range(start=start_time, end=end_time, freq='T')
 
 # Generate dummy lat, lon, height data
 np.random.seed(42)  # for reproducibility
-latitudes = np.random.uniform(low=-90, high=90, size=len(time_range))
-longitudes = np.random.uniform(low=-180, high=180, size=len(time_range))
+import numpy as np
+import pandas as pd
+
+# Coordinates for Los Angeles and New York
+la_coords = (34.052235, -118.243683)  # Latitude, Longitude of Los Angeles
+ny_coords = (40.712776, -74.005974)   # Latitude, Longitude of New York
+
+# Number of waypoints (rows in your DataFrame)
+num_points = 100  # Adjust this based on the number of rows you want
+
+# Generate latitudes and longitudes that gradually move from LA to NY
+latitudes = np.linspace(la_coords[0], ny_coords[0], num_points)
+longitudes = np.linspace(la_coords[1], ny_coords[1], num_points)
+
+# Add a small random noise to make the path more natural (optional)
+latitudes += np.random.normal(0, 0.1, num_points)  # Adjust 0.1 for more or less variation
+longitudes += np.random.normal(0, 0.1, num_points)
+
+# Generate time data (optional)
+time_range = pd.date_range(start='2024-01-01 06:00', periods=num_points, freq='T')
+
+# Create the DataFrame
+df_path = pd.DataFrame({
+    'time': time_range,
+    'latitude': latitudes,
+    'longitude': longitudes
+})
+
+# Display the DataFrame with the generated path
+print(df_path)
+
 heights = np.random.uniform(low=0, high=10000, size=len(time_range))  # in meters
 
 # Create dataframe
