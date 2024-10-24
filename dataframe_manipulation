@@ -39,6 +39,28 @@ for time in df['time']:
 # Create a filtered dataframe based on the selected times
 df_filtered = df[df['time'].isin(filtered_times)].reset_index(drop=True)
 
+
+
+from geopy.distance import geodesic
+
+# Initialize velocity column
+df_filtered['velocity'] = 0
+
+# Loop through the dataframe to calculate velocity using lat, lon, and time
+for i in range(1, len(df_filtered)):
+    # Calculate the distance between the current and previous point in meters
+    coord1 = (df_filtered['latitude'].iloc[i-1], df_filtered['longitude'].iloc[i-1])
+    coord2 = (df_filtered['latitude'].iloc[i], df_filtered['longitude'].iloc[i])
+    distance = geodesic(coord1, coord2).meters
+    
+    # Calculate the time difference in seconds
+    time_diff = (df_filtered['time'].iloc[i] - df_filtered['time'].iloc[i-1]).total_seconds()
+    
+    # Calculate velocity (m/s)
+    velocity = distance / time_diff if time_diff != 0 else 0
+    df_filtered.at[i, 'velocity'] = velocity
+
+
 # Display or work with the filtered dataframe
 print(df_filtered.header(10))
 
