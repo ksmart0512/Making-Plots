@@ -1,0 +1,58 @@
+#%%
+# Generate time data every minute from 6am to 10am
+start_time = datetime.strptime('06:00', '%H:%M')
+end_time = datetime.strptime('10:00', '%H:%M')
+time_range = pd.date_range(start=start_time, end=end_time, freq='T')
+
+# Generate dummy lat, lon, height data
+np.random.seed(42)  # for reproducibility
+latitudes = np.random.uniform(low=-90, high=90, size=len(time_range))
+longitudes = np.random.uniform(low=-180, high=180, size=len(time_range))
+heights = np.random.uniform(low=0, high=10000, size=len(time_range))  # in meters
+
+# Create dataframe
+df = pd.DataFrame({
+    'time': time_range,
+    'latitude': latitudes,
+    'longitude': longitudes,
+    'height': heights
+})
+
+# Display or work with the dataframe
+print(df.headers(10)
+
+#%% dataframe manipulation
+
+#Filter for every 5 minutes
+from datetime import timedelta
+
+# Set the initial time and filtering step
+start_time = df['time'].iloc[0]
+time_step = timedelta(minutes=5)
+
+# Filter the dataframe based on a 5-minute time difference
+filtered_times = [start_time]
+for time in df['time']:
+    if time >= filtered_times[-1] + time_step:
+        filtered_times.append(time)
+
+# Create a filtered dataframe based on the selected times
+df_filtered = df[df['time'].isin(filtered_times)].reset_index(drop=True)
+
+# Display or work with the filtered dataframe
+print(df_filtered.header(10))
+
+# Calculate velocity based on the change in height over the change in time
+df_filtered['velocity'] = 0  # Initialize velocity column
+
+for i in range(1, len(df_filtered)):
+    # Calculate time difference in seconds
+    time_diff = (df_filtered['time'].iloc[i] - df_filtered['time'].iloc[i-1]).total_seconds()
+    
+    # Calculate height difference
+    height_diff = df_filtered['height'].iloc[i] - df_filtered['height'].iloc[i-1]
+    
+    # Calculate velocity (m/s)
+    velocity = height_diff / time_diff if time_diff != 0 else 0
+    df_filtered.at[i, 'velocity'] = velocity
+
